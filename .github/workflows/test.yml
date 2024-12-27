@@ -1,0 +1,94 @@
+name: Run Playwright Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Select test with exact severity to run
+        type: choice
+        required: true
+        default: fast_smoke
+        options:
+          - all
+          - fast_smoke
+          - smoke
+          - full_test
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    name: Set up environment and run tests
+
+    steps:
+    - name: Check out source repository
+      uses: actions/checkout@v4
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        playwright install
+
+    - name: Install Allure for report generation
+      run: |
+        sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz &&
+        sudo tar -zxvf allure-2.32.0.tgz -C /opt/ &&
+        sudo ln -s /opt/allure-2.32.0/bin/allure /usr/bin/allure
+
+    - name: Run all tests
+      if: "github.event.inputs.deployment_target == 'all'"
+      run: |
+        npx playwright test --reporter=line,allure-playwright
+
+    - name: Run fast_smoke tests
+      if: "github.event.inputs.deployment_target == 'fast_smoke'"
+      run: |
+        npx playwright test --grep @fast_smoke --reporter=line,allure-playwright
+
+    - name: Run smoke tests
+      if: "github.event.inputs.deployment_target == 'smoke'"
+      run: |
+        npx playwright test --grep @smoke --reporter=line,allure-playwright
+
+    - name: Run full tests
+      if: "github.event.inputs.deployment_target == 'full_test'"
+      run: |
+        npx playwright test --grep @full_test --reporter=line,allure-playwright
+
+    - name: Generate Allure report
+      run: allure generate -c ./playwright-report -o _site
+
+    - name: Save report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: _site
+        path: _site
+        retention-days: 3
+
+  publish-report:
+    name: Publish report
+    runs-on: ubuntu-latest
+    needs: run_tests
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: Upload pages artifacts
+        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
