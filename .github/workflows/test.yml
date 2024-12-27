@@ -40,7 +40,9 @@ jobs:
         node-version: '18'
 
     - name: Install dependencies
-      run: npm install
+      run: |
+        pip install -r requirements.txt
+        playwright install
 
     - name: Install Allure for report generation
       run: |
