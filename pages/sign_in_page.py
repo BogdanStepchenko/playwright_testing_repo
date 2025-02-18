@@ -5,14 +5,7 @@ from pages.helper.randomizer import random_password, random_name, random_email
 
 
 class SignInPage(BasePage):
-    sign_in_url = 'https://magento.softwaretestingboard.com/customer/account/create/'
-
-    def __init__(self, page: Page):
-        super().__init__(page)
-        self.password_value = None
-
-    def open_by_url(self, url=None):
-        return super().open_by_url(self.sign_in_url)
+    page_url = 'https://magento.softwaretestingboard.com/customer/account/create/'
 
     def fill_first_name(self, name=None):
         name_element = self.find_element(sign_in.FIRST_NAME)

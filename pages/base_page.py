@@ -3,12 +3,16 @@ from pages.locators.sign_in_page import CONSENT_BUTTON
 
 
 class BasePage:
+    page_url = None
 
     def __init__(self, page: Page):
         self.page = page
+        self.password_value = None
 
-    def open_by_url(self, url):
-        self.page.goto(url)
+    def open_by_url(self):
+        if not self.page_url:
+            raise ValueError("page_url is not set in the child class")
+        self.page.goto(self.page_url)
         self.click_on_consent_button()
         return self.page.url
 

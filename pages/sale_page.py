@@ -3,10 +3,7 @@ from pages.locators import sale_page as sales
 
 
 class SalePage(BasePage):
-    sale_page_url = 'https://magento.softwaretestingboard.com/sale.html'
-
-    def open_by_url(self, url=None):
-        return super().open_by_url(self.sale_page_url)
+    page_url = 'https://magento.softwaretestingboard.com/sale.html'
 
     def check_all_sales_cards_are_displayed(self):
         self.find_element(sales.MAIN_SALE)
