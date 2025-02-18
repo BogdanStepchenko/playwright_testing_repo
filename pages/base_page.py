@@ -43,8 +43,8 @@ class BasePage:
         assert current_url != previous_url, "URL has NOT changed!"
 
     def click_on_consent_button(self):
-        self.page.wait_for_selector(CONSENT_BUTTON)
         try:
+            self.page.wait_for_selector(CONSENT_BUTTON)
             self.find_and_click(CONSENT_BUTTON)
         except Exception as e:
             print("Consent button not found or not clickable:", e)
